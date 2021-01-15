@@ -1,0 +1,8 @@
+workspace:
+  max_x: 0.8
+  min_x: -0.8
+  max_y: 0.8
+  min_y: -0.8
+  max_z: 2
+  min_z: 1
+  frame_id: base_link

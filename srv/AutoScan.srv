@@ -1,0 +1,11 @@
+string frame_id
+float64 h
+float64 radius
+bool fixed_R
+float64 R
+bool fixed_P
+float64 P
+bool fixed_Y
+float64 Y
+---
+bool result
