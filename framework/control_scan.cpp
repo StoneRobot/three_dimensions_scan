@@ -11,6 +11,7 @@ ControlScan::ControlScan(ros::NodeHandle *n)
     : nh_{n}
 {
     ROS_INFO_STREAM("on_off " << on_off << ", scan_switch " << scan_switch << ", reset_switch " << reset_switch);
+    load_pcl_client = nh_->serviceClient<hirop_msgs::LoadPCL>("loadPointCloud");
 }
 
 ControlScan::~ControlScan()
@@ -52,7 +53,7 @@ bool ControlScan::save(const std::string &file)
     return true;
 }
 
-bool ControlScan::dataReset()
+bool ControlScan::resetData()
 {
     ROS_INFO_STREAM("scan reset");
     reset_switch = true;
@@ -67,6 +68,14 @@ bool ControlScan::close()
         return true;
     on_off = false;
     return true;
+}
+
+bool ControlScan::show(const std::string& file)
+{
+    hirop_msgs::LoadPCL srv;
+    srv.request.fileName = file;
+    load_pcl_client.call(srv);
+    return !srv.response.result;
 }
 
 const geometry_msgs::PoseStamped& ControlScan::getBeginPose() const

@@ -29,6 +29,9 @@ private:
     bool savePoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
     bool motionRecordPoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
     bool saveScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
+    bool loadScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
+    bool resetScanCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
+    bool rmWorkspaceCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
 
 private:
     ros::NodeHandle *nh_;
@@ -42,4 +45,7 @@ private:
     ros::ServiceServer save_pose_server;
     ros::ServiceServer motion_record_pose_server;
     ros::ServiceServer save_scan_data;
+    ros::ServiceServer load_scan_data;
+    ros::ServiceServer reset_scan_data;
+    ros::ServiceServer rm_workspace_server;
 };

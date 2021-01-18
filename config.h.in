@@ -1,2 +1,2 @@
-#cmakedefine TEST
+// #cmakedefine TEST
 #define TEST

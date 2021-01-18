@@ -5,14 +5,15 @@ using namespace std;
 MotionActuator::MotionActuator(ros::NodeHandle *n, moveit::planning_interface::MoveGroupInterface *move_group)
     : nh_{n},
       load_obj_client{nh_->serviceClient<hirop_msgs::PubObject>("/loadObject")},
+      rm_obj_client{nh_->serviceClient<hirop_msgs::removeObject>("rmObject")},
       move_group_{move_group},
       plan_count{1},
       execute_count{1},
       joint_1_bounds{move_group_->getRobotModel()->getVariableBounds(move_group_->getJointNames()[0])}
 {
     setConstraint(true, false);
-    move_group_->setMaxVelocityScalingFactor(1);
-    move_group_->setMaxAccelerationScalingFactor(1);
+    move_group_->setMaxVelocityScalingFactor(0.1);
+    move_group_->setMaxAccelerationScalingFactor(0.1);
 }
 
 MotionActuator::~MotionActuator()
@@ -77,6 +78,14 @@ const geometry_msgs::PoseStamped MotionActuator::getPose() const
     return move_group_->getCurrentPose();
 }
 
+bool MotionActuator::planAndMove()
+{
+    bool flag = false;
+    if (plan())
+        flag = move();
+    return flag;
+}
+
 bool MotionActuator::plan()
 {
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -106,14 +115,6 @@ bool MotionActuator::move()
         }
         ++exe_cnt;
     }
-    return flag;
-}
-
-bool MotionActuator::planAndMove()
-{
-    bool flag = false;
-    if (plan())
-        flag = move();
     return flag;
 }
 
@@ -162,7 +163,7 @@ void MotionActuator::getWorkspace(moveit_msgs::Constraints &con)
     // con.position_constraints[0].target_point_offset.y = 0.02;
     // con.position_constraints[0].target_point_offset.z = 0.02;
     // con.position_constraints[0].weight = 1;
-    vector<string> ob_name = {"q", "h", "z", "y", "s", "x"};
+    
     hirop_msgs::PubObject srv;
     srv.request.header.frame_id = ws_.frame_id;
     // srv.request.object_id.resize(6);
@@ -236,4 +237,17 @@ void MotionActuator::getJointConstraint(moveit_msgs::Constraints &con)
         con.joint_constraints[i].tolerance_below = 0.1;
         con.joint_constraints[i].weight = 1;
     }
+}
+
+bool MotionActuator::rmWorkspace()
+{
+    bool flag = true;
+    hirop_msgs::removeObject srv;
+    for(auto i: ob_name)
+    {
+        srv.request.id = i;
+        rm_obj_client.call(srv);
+        flag &= srv.response.result;
+    }
+    return flag;
 }

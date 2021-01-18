@@ -6,6 +6,7 @@
 #include <moveit_msgs/Constraints.h>
 
 #include "hirop_msgs/PubObject.h"
+#include "hirop_msgs/removeObject.h"
 
 struct Workspace
 {
@@ -49,6 +50,12 @@ public:
 
     const geometry_msgs::PoseStamped getPose() const;
 
+    /**
+     * @brief 进行规划和移动
+    */
+    bool planAndMove();
+    
+    bool rmWorkspace();
 private:
     /**
      * @brief 进行规划
@@ -59,11 +66,6 @@ private:
      * @brief 进行移动
     */
     bool move();
-
-    /**
-     * @brief 进行规划和移动
-    */
-    bool planAndMove();
 
     /**
      * @brief 设置约束
@@ -84,9 +86,11 @@ private:
     */
     void getJointConstraint(moveit_msgs::Constraints &con);
 
+
 private:
     ros::NodeHandle *nh_;
     ros::ServiceClient load_obj_client;
+    ros::ServiceClient rm_obj_client;
     moveit::planning_interface::MoveGroupInterface *move_group_;
 
     // public:
@@ -95,4 +99,5 @@ private:
     const int plan_count;
     const int execute_count;
     const moveit::core::VariableBounds joint_1_bounds;
+    std::vector<std::string> ob_name = {"q", "h", "z", "y", "s", "x"};
 };

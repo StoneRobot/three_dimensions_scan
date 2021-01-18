@@ -66,10 +66,35 @@ bool ScanFramework::savePose(const std::string &file)
 bool ScanFramework::saveScanData(const std::string &file)
 {
     bool flag = false;
+    string file_pcd;
     geometry_msgs::PoseStamped pose;
-    flag = cs_ptr->save(file);
+    file_pcd = "~/.hirop/data/three_dimensions" + file + ".pcd";
+    flag = cs_ptr->save(file_pcd);
     pose = cs_ptr->getBeginPose();
     flag &= pm_ptr->recordPose(pose);
     flag &= pm_ptr->savePose(file);
     return flag;
+}
+
+bool ScanFramework::loadScanData(const std::string &file)
+{
+    bool flag = false;
+    string file_pcd;
+    vector<geometry_msgs::PoseStamped> p;
+    flag = pm_ptr->loadPose(file, p);
+    ma_ptr->setPose(p);
+    flag &= ma_ptr->planAndMove();
+    file_pcd = "~/.hirop/data/three_dimensions" + file + ".pcd";
+    flag &= cs_ptr->show(file_pcd);
+    return flag;
+}
+
+bool ScanFramework::resetScanData()
+{
+    return cs_ptr->resetData();
+}
+
+bool ScanFramework::rmWorkspace()
+{
+    return ma_ptr->rmWorkspace();
 }

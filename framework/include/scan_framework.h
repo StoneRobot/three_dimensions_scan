@@ -49,6 +49,12 @@ public:
     */
     bool saveScanData(const std::string &file);
 
+    bool loadScanData(const std::string &file);
+
+    bool resetScanData();
+
+    bool rmWorkspace();
+
 private:
     std::shared_ptr<moveit::planning_interface::MoveGroupInterface> mg_ptr;
     ros::NodeHandle *nh;
