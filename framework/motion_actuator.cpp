@@ -34,7 +34,7 @@ void MotionActuator::setPose(const std::vector<geometry_msgs::PoseStamped> &pose
 bool MotionActuator::autoMotion()
 {
     bool flag = false;
-    setConstraint(false, false);
+    setConstraint(true, false);
     if (planAndMove())
         flag = rotate();
     return flag;

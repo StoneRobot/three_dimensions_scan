@@ -62,4 +62,5 @@ private:
     std::shared_ptr<MotionActuator> ma_ptr;
     std::shared_ptr<PoseManager> pm_ptr;
     std::shared_ptr<ControlScan> cs_ptr;
+    const std::string pcd_uri = "/home/fshs/.hirop/data/three_dimensions/";
 };
