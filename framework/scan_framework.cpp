@@ -44,13 +44,52 @@ bool ScanFramework::rotate()
     return ma_ptr->rotate();
 }
 
-double ScanFramework::motionRcordPose(const std::string &file)
+bool ScanFramework::loadPose(const std::string &file)
 {
-    vector<vector<double>> joints;
-    if (pm_ptr->loadPose(file, joints))
+    pose_file_name = file;
+    motion_joints_pose.clear();
+    return pm_ptr->loadPose(file, motion_joints_pose);
+}
+
+bool ScanFramework::insertPose(int insert, bool is_save)
+{
+    vector<double> j = ma_ptr->getJointPose();
+    vector<vector<double>>::iterator iter = motion_joints_pose.begin();
+
+    try
     {
-        return ma_ptr->motionRecordPose(joints);
+        iter += insert;
+        motion_joints_pose.insert(iter, j);
     }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+
+    if (is_save)
+    {
+        for (vector<vector<double>>::iterator iter = motion_joints_pose.begin(); iter < motion_joints_pose.end(); iter++)
+        {
+            if (!pm_ptr->recordPose(*iter))
+            {
+                return false;
+            }
+        }
+        pm_ptr->savePose(pose_file_name);
+    }
+    return true;
+}
+
+double ScanFramework::motionRcordPose()
+{
+    double rate;
+    vector<double> j;
+    j = ma_ptr->getJointPose();
+    rate = ma_ptr->motionRecordPose(motion_joints_pose);
+    ma_ptr->setPose(j);
+    ma_ptr->planAndMove();
+    return rate;
 }
 
 bool ScanFramework::RecordPose()
@@ -68,7 +107,8 @@ bool ScanFramework::saveScanData(const std::string &file)
     bool flag = false;
     string file_pcd;
     geometry_msgs::PoseStamped pose;
-    file_pcd = pcd_uri + file + ".pcd";
+    file_pcd = pcd_uri + file;
+    ROS_INFO_STREAM("file_pcd: " << file_pcd);
     flag = cs_ptr->save(file_pcd);
     pose = cs_ptr->getBeginPose();
     flag &= pm_ptr->recordPose(pose);
@@ -97,4 +137,9 @@ bool ScanFramework::resetScanData()
 bool ScanFramework::rmWorkspace()
 {
     return ma_ptr->rmWorkspace();
+}
+
+void ScanFramework::stopMotion()
+{
+    ma_ptr->stopMotion();
 }

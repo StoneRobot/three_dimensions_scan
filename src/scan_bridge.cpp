@@ -13,6 +13,9 @@ ScanBridge::ScanBridge(ros::NodeHandle *n)
     // 记录点位+加载点位扫描
     add_pose_server = nh_->advertiseService("add_scan_pose", &ScanBridge::addPoseCB, this);
     save_pose_server = nh_->advertiseService("save_scan_pose", &ScanBridge::savePoseCB, this);
+
+    load_pose_server = nh_->advertiseService("load_scan_pose", &ScanBridge::loadPoseCB, this);
+    insert_pose_server = nh_->advertiseService("insert_pose", &ScanBridge::insertPoseCB, this);
     motion_record_pose_server = nh_->advertiseService("motion_record_pose", &ScanBridge::motionRecordPoseCB, this);
     // 保存和加载点云
     save_scan_data = nh_->advertiseService("save_scan_data", &ScanBridge::saveScanDataCB, this);
@@ -20,6 +23,7 @@ ScanBridge::ScanBridge(ros::NodeHandle *n)
 
     reset_scan_data = nh_->advertiseService("reset_scan_data", &ScanBridge::resetScanCB, this);
     rm_workspace_server = nh_->advertiseService("rm_workspace", &ScanBridge::rmWorkspaceCB, this);
+    stop_motion_server = nh_->advertiseService("stop_motion", &ScanBridge::stopMotionCB, this);
 }
 
 ScanBridge::~ScanBridge()
@@ -66,9 +70,21 @@ bool ScanBridge::savePoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFi
     return true;
 }
 
-bool ScanBridge::motionRecordPoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep)
+bool ScanBridge::loadPoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep)
 {
-    rep.result = sf_ptr->motionRcordPose(req.file);
+    rep.result = sf_ptr->loadPose(req.file);
+    return true;
+}
+
+bool ScanBridge::insertPoseCB(MSGS_FILE::InsertPose::Request &req, MSGS_FILE::InsertPose::Response &rep)
+{
+    rep.result = sf_ptr->insertPose(req.insert, req.is_save);
+    return true;
+}
+
+bool ScanBridge::motionRecordPoseCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response& rep)
+{
+    sf_ptr->motionRcordPose();
     return true;
 }
 
@@ -93,5 +109,11 @@ bool ScanBridge::resetScanCB(std_srvs::Empty::Request &req, std_srvs::Empty::Res
 bool ScanBridge::rmWorkspaceCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep)
 {
     sf_ptr->rmWorkspace();
+    return true;
+}
+
+bool ScanBridge::stopMotionCB(std_srvs::Empty::Request& req, std_srvs::Empty::Response & rep)
+{
+    sf_ptr->stopMotion();
     return true;
 }

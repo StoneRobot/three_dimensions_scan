@@ -64,6 +64,7 @@ add_service_files(
   FILES
   AutoScan.srv
   ScanFile.srv 
+  InsertPose.srv
 )
 
 ## Generate actions in the 'action' folder

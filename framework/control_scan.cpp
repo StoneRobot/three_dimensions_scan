@@ -1,5 +1,7 @@
 #include "control_scan.h"
 
+#include "rtabmap_ros/AutoExportClouds.h"
+
 using namespace std;
 
 bool ControlScan::on_off = false;
@@ -12,6 +14,14 @@ ControlScan::ControlScan(ros::NodeHandle *n)
 {
     ROS_INFO_STREAM("on_off " << on_off << ", scan_switch " << scan_switch << ", reset_switch " << reset_switch);
     load_pcl_client = nh_->serviceClient<hirop_msgs::LoadPCL>("loadPointCloud");
+
+    pause_rtabmap_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/pause");
+    pause_rtabmap_odom_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/pause_odom");
+    resume_rtabmap_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/resume");
+    resume_rtabmap_odom_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/resume_odom");
+    save_rtabmap_pcd_client = nh_->serviceClient<rtabmap_ros::AutoExportClouds>("/rtabmap/auto_export_clouds");
+    reset_rtabmap_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/reset");
+    reset_rtabmap_odom_client = nh_->serviceClient<std_srvs::Empty>("/rtabmap/reset_odom");
 }
 
 ControlScan::~ControlScan()
@@ -42,35 +52,54 @@ bool ControlScan::start(const geometry_msgs::PoseStamped &pose)
 bool ControlScan::pause()
 {
     ROS_INFO_STREAM("scan pause");
-    if (!scan_switch)
-        return true;
-    return true;
+    std_srvs::Empty srv;
+    if (callServer<std_srvs::Empty>(pause_rtabmap_odom_client, srv))
+        if (callServer<std_srvs::Empty>(pause_rtabmap_client, srv))
+            return true;
+    return false;
 }
 
-bool ControlScan::save(const std::string &file)
+bool ControlScan::resume()
+{
+    std_srvs::Empty srv;
+    if(callServer<std_srvs::Empty>(resume_rtabmap_client, srv))
+        if(callServer<std_srvs::Empty>(resume_rtabmap_odom_client, srv))
+        return true;
+    return false;
+}
+
+bool ControlScan::save(const std::string& file_path)
 {
     ROS_INFO_STREAM("scan save");
-    return true;
+    pause();
+    rtabmap_ros::AutoExportClouds srv;
+    srv.request.default_path = false;
+    srv.request.self_path = file_path;
+    if (callServer<rtabmap_ros::AutoExportClouds>(save_rtabmap_pcd_client, srv))
+        return true;
+    return false;
 }
 
 bool ControlScan::resetData()
 {
     ROS_INFO_STREAM("scan reset");
-    reset_switch = true;
-    set_begin_pose = false;
-    return true;
+    std_srvs::Empty srv;
+    if (callServer<std_srvs::Empty>(reset_rtabmap_client, srv))
+        if (callServer<std_srvs::Empty>(reset_rtabmap_odom_client, srv))
+            return true;
+    return false;
 }
 
 bool ControlScan::close()
 {
     ROS_INFO_STREAM("scan close");
-    if (!on_off)
+    if (!scan_switch)
         return true;
-    on_off = false;
+    scan_switch = false;
     return true;
 }
 
-bool ControlScan::show(const std::string& file)
+bool ControlScan::show(const std::string &file)
 {
     hirop_msgs::LoadPCL srv;
     srv.request.fileName = file;
@@ -78,7 +107,16 @@ bool ControlScan::show(const std::string& file)
     return !srv.response.result;
 }
 
-const geometry_msgs::PoseStamped& ControlScan::getBeginPose() const
+const geometry_msgs::PoseStamped &ControlScan::getBeginPose() const
 {
     return begin_pose;
+}
+
+template<typename T>
+bool ControlScan::callServer(ros::ServiceClient& client, T& srv)
+{
+    bool flag;
+    flag = client.call(srv);
+    ROS_INFO_STREAM(client.getService() << ": " << (flag ? "SUCCESS" : "FAILED"));
+    return flag;
 }

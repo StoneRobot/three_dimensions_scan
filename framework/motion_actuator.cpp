@@ -9,11 +9,14 @@ MotionActuator::MotionActuator(ros::NodeHandle *n, moveit::planning_interface::M
       move_group_{move_group},
       plan_count{1},
       execute_count{1},
-      joint_1_bounds{move_group_->getRobotModel()->getVariableBounds(move_group_->getJointNames()[0])}
+      joint_1_bounds{move_group_->getRobotModel()->getVariableBounds(move_group_->getJointNames()[0])},
+      stop_flag{false}
 {
-    setConstraint(true, false);
-    move_group_->setMaxVelocityScalingFactor(0.1);
-    move_group_->setMaxAccelerationScalingFactor(0.1);
+    setConstraint(false, false);
+    double speed;
+    nh_->param("/scan_speed", speed, 0.03);
+    move_group_->setMaxVelocityScalingFactor(speed);
+    move_group_->setMaxAccelerationScalingFactor(speed);
 }
 
 MotionActuator::~MotionActuator()
@@ -34,7 +37,7 @@ void MotionActuator::setPose(const std::vector<geometry_msgs::PoseStamped> &pose
 bool MotionActuator::autoMotion()
 {
     bool flag = false;
-    setConstraint(true, false);
+    setConstraint(false, false);
     if (planAndMove())
         flag = rotate();
     return flag;
@@ -60,9 +63,12 @@ double MotionActuator::motionRecordPose(const std::vector<std::vector<double>> &
     for (auto i : joints)
     {
         setPose(i);
-        if (autoMotion())
+        if (planAndMove())
             ++cnt;
+        if (stop_flag)
+            break;
     }
+    stop_flag = false;
     return static_cast<double>(cnt / count);
 }
 
@@ -163,7 +169,7 @@ void MotionActuator::getWorkspace(moveit_msgs::Constraints &con)
     // con.position_constraints[0].target_point_offset.y = 0.02;
     // con.position_constraints[0].target_point_offset.z = 0.02;
     // con.position_constraints[0].weight = 1;
-    
+
     hirop_msgs::PubObject srv;
     srv.request.header.frame_id = ws_.frame_id;
     // srv.request.object_id.resize(6);
@@ -243,11 +249,17 @@ bool MotionActuator::rmWorkspace()
 {
     bool flag = true;
     hirop_msgs::removeObject srv;
-    for(auto i: ob_name)
+    for (auto i : ob_name)
     {
         srv.request.id = i;
         rm_obj_client.call(srv);
         flag &= srv.response.result;
     }
     return flag;
+}
+
+void MotionActuator::stopMotion()
+{
+    move_group_->stop();
+    stop_flag = true;
 }

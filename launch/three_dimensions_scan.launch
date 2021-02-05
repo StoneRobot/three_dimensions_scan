@@ -1,4 +1,5 @@
 <launch>
+    <param name="scan_speed" type="double" value="0.15" />
     <rosparam file="$(find three_dimensions_scan)/cfg/workspace.yaml" command="load" />
     <node pkg="three_dimensions_scan" name="test" type="three_dimensions_scan_node" output="screen" />
 </launch>

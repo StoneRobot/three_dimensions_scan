@@ -9,6 +9,7 @@
 #ifdef TEST
 #include "three_dimensions_scan/AutoScan.h"
 #include "three_dimensions_scan/ScanFile.h"
+#include "three_dimensions_scan/InsertPose.h"
 #define MSGS_FILE three_dimensions_scan
 #else
 #include "hirop_msgs/AutoScan.h"
@@ -27,11 +28,14 @@ private:
     bool rotateCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
     bool addPoseCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
     bool savePoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
-    bool motionRecordPoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
+    bool loadPoseCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
+    bool insertPoseCB(MSGS_FILE::InsertPose::Request &req, MSGS_FILE::InsertPose::Response &rep);
+    bool motionRecordPoseCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
     bool saveScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
     bool loadScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep);
     bool resetScanCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
     bool rmWorkspaceCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep);
+    bool stopMotionCB(std_srvs::Empty::Request& req, std_srvs::Empty::Response & rep);
 
 private:
     ros::NodeHandle *nh_;
@@ -43,9 +47,12 @@ private:
     ros::ServiceServer rotato_scan_server;
     ros::ServiceServer add_pose_server;
     ros::ServiceServer save_pose_server;
+    ros::ServiceServer load_pose_server;
+    ros::ServiceServer insert_pose_server;
     ros::ServiceServer motion_record_pose_server;
     ros::ServiceServer save_scan_data;
     ros::ServiceServer load_scan_data;
     ros::ServiceServer reset_scan_data;
     ros::ServiceServer rm_workspace_server;
+    ros::ServiceServer stop_motion_server;
 };

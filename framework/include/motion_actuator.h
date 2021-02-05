@@ -56,6 +56,8 @@ public:
     bool planAndMove();
     
     bool rmWorkspace();
+
+    void stopMotion();
 private:
     /**
      * @brief 进行规划
@@ -100,4 +102,5 @@ private:
     const int execute_count;
     const moveit::core::VariableBounds joint_1_bounds;
     std::vector<std::string> ob_name = {"q", "h", "z", "y", "s", "x"};
+    bool stop_flag;
 };
