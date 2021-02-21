@@ -7,7 +7,7 @@ ScanBridge::ScanBridge(ros::NodeHandle *n)
       sf_ptr{make_shared<ScanFramework>()}
 {
     // 手动和自动扫描
-    hm_scan_server = nh_->advertiseService("hm_scan", &ScanBridge::hmScanCB, this);
+    // hm_scan_server = nh_->advertiseService("hm_scan", &ScanBridge::hmScanCB, this);
     auto_scan_server = nh_->advertiseService("auto_scan", &ScanBridge::autoScanCB, this);
     rotato_scan_server = nh_->advertiseService("rotate_scan", &ScanBridge::rotateCB, this);
     // 记录点位+加载点位扫描

@@ -4,6 +4,7 @@
 #include "hirop_msgs/LoadPCL.h"
 #include <std_srvs/Empty.h>
 
+
 class ControlScan
 {
 public:
@@ -69,6 +70,7 @@ private:
     ros::ServiceClient resume_rtabmap_client;
     ros::ServiceClient resume_rtabmap_odom_client;
     ros::ServiceClient save_rtabmap_pcd_client;
+    ros::ServiceClient rtabmap_auto_clear_the_cache_client;
     ros::ServiceClient reset_rtabmap_client;
     ros::ServiceClient reset_rtabmap_odom_client;
 

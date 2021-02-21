@@ -7,7 +7,10 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+find_package(PCL REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
+  pcl_conversions
+  pcl_ros
   geometry_msgs
   hirop_msgs
   moveit_core
@@ -132,6 +135,7 @@ configure_file(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
   ./include
   ./framework/include
 )
@@ -171,6 +175,8 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  hirop_perception
 )
 
 # add_executable(test_node 

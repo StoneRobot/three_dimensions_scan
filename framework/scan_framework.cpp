@@ -1,4 +1,17 @@
 #include "scan_framework.h"
+#include "hirop/perception/transformUltity.h"
+
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
+#include "pcl/common/io.h"
+#include "pcl/common/transforms.h"
+
+#include "pcl/conversions.h"
+#include "pcl_conversions/pcl_conversions.h"
+#include <pcl/filters/statistical_outlier_removal.h>
+
+#include <pcl/io/ply_io.h>
 
 using namespace std;
 
@@ -10,6 +23,7 @@ ScanFramework::ScanFramework()
       cs_ptr{make_shared<ControlScan>(nh)}
 {
     cs_ptr->bringup();
+    cs_ptr->start(ma_ptr->getPose());
 }
 
 ScanFramework::~ScanFramework()
@@ -19,23 +33,15 @@ ScanFramework::~ScanFramework()
 
 bool ScanFramework::HMScan(const bool &on_off)
 {
-    bool flag = false;
-    if (on_off)
-        flag = cs_ptr->start(ma_ptr->getPose());
-    else
-        flag = cs_ptr->close();
-    return flag;
+    return true;
 }
 
 bool ScanFramework::autoScan(const LookingParam &lp)
 {
-    if (cs_ptr->start(ma_ptr->getPose()))
-    {
-        vector<geometry_msgs::PoseStamped> poses;
-        pm_ptr->generatorPose(lp, poses);
-        ma_ptr->setPose(poses);
-        return ma_ptr->autoMotion();
-    }
+    vector<geometry_msgs::PoseStamped> poses;
+    pm_ptr->generatorPose(lp, poses);
+    ma_ptr->setPose(poses);
+    return ma_ptr->autoMotion();
     return false;
 }
 
@@ -55,7 +61,6 @@ bool ScanFramework::insertPose(int insert, bool is_save)
 {
     vector<double> j = ma_ptr->getJointPose();
     vector<vector<double>>::iterator iter = motion_joints_pose.begin();
-
     try
     {
         iter += insert;
@@ -66,7 +71,6 @@ bool ScanFramework::insertPose(int insert, bool is_save)
         std::cerr << e.what() << '\n';
         return false;
     }
-
     if (is_save)
     {
         for (vector<vector<double>>::iterator iter = motion_joints_pose.begin(); iter < motion_joints_pose.end(); iter++)
@@ -113,6 +117,24 @@ bool ScanFramework::saveScanData(const std::string &file)
     pose = cs_ptr->getBeginPose();
     flag &= pm_ptr->recordPose(pose);
     flag &= pm_ptr->savePose(file);
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
+    pcl::PointCloud<pcl::PointXYZRGB> cloud_1;
+    file_pcd += ".pcd";
+    pcl::io::loadPCDFile(file_pcd, cloud_1);
+    pcl::io::loadPCDFile(file_pcd, *cloud_);
+
+    Eigen::Vector3d T;
+    Eigen::Matrix3d R;
+    string cameraFrame;
+    nh->param("/cameraFrame", cameraFrame, string("camera_color_optical_frame"));
+    transformUltity::transformFrame("world", cameraFrame, T, R);
+    Eigen::Isometry3d trans_matrix = transformUltity::makeMatrix(T, R);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::transformPointCloud(*cloud_, *temp, trans_matrix.matrix());
+
+    pcl::io::savePCDFile(file_pcd, *temp);
+
     return flag;
 }
 

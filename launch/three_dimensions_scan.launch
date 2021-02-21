@@ -2,4 +2,11 @@
     <param name="scan_speed" type="double" value="0.15" />
     <rosparam file="$(find three_dimensions_scan)/cfg/workspace.yaml" command="load" />
     <node pkg="three_dimensions_scan" name="test" type="three_dimensions_scan_node" output="screen" />
+
+    <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
+        <arg name="rtabmap_args" value="--delete_db_on_start" />
+        <arg name="depth_topic" value="/camera/aligned_depth_to_color/image_raw" />
+        <arg name="rgb_topic" value="/camera/color/image_raw" />
+        <arg name="camera_info_topic" value="/camera/color/camera_info" />
+    </include>
 </launch>
