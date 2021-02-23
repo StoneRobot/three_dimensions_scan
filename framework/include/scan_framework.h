@@ -53,13 +53,17 @@ public:
     */
     bool saveScanData(const std::string &file);
 
-    bool loadScanData(const std::string &file);
+    bool loadScanData(const std::string &file, bool pub_octo);
 
     bool resetScanData();
 
     bool rmWorkspace();
 
     void stopMotion();
+
+    bool pause();
+
+    bool resume();
 
 private:
     std::shared_ptr<moveit::planning_interface::MoveGroupInterface> mg_ptr;

@@ -1,23 +1,22 @@
 <launch>
-    <include file="$(find hsr_bringup)/launch/co605_gripper.launch" />
-
-    <include file="$(find gripper_bridge)/launch/gripper_bridge0.launch" />
+    <!-- <include file="$(find hsr_bringup)/launch/co605_gripper.launch" />
 
     <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
 
     <include file="$(find hsr_bringup)/launch/publish_d435i_calibration_single.launch" />
-    
+
     <include file="$(find hsr_bringup)/launch/publish_d435i_calibration_point_cloud_pub.launch" /> 
 
     <node name="dm_bridge" type="dm_bridge" pkg="dm_bridge" />
 
-    <node name="perception_bridge" type="perception_bridge" pkg="perception_bridge" />
+    <include file="$(find perception_bridge)/launch/perception_bridge.launch" /> -->
 
-    <include file="$(find vision_bridge)/launch/vision_bridge_realsense2.launch" /> 
+    <!-- <include file="$(find gripper_bridge)/launch/gripper_bridge0.launch" /> -->
+    <!-- <include file="$(find vision_bridge)/launch/vision_bridge_realsense2.launch" />  -->
 
-    <node name="planner_bridge" type='planner' pkg="planner_bridge" />
+    <!-- <node name="planner_bridge" type='planner' pkg="planner_bridge" /> -->
 
-    <include file="$(find motion_bridge)/launch/singel_bring.launch" /> 
+    <!-- <include file="$(find motion_bridge)/launch/singel_bring.launch" />  -->
 
-    <include file="$(find pickplace_bridge)/launch/serial_pickplace_bridge.launch" /> 
+    <!-- <include file="$(find pickplace_bridge)/launch/serial_pickplace_bridge.launch" />  -->
 </launch>

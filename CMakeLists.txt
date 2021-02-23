@@ -8,6 +8,7 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(PCL REQUIRED)
+find_package(octomap REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
@@ -19,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  # octomap
+  # octomap_msgs
   message_generation
 )
 
@@ -68,6 +71,7 @@ add_service_files(
   AutoScan.srv
   ScanFile.srv 
   InsertPose.srv
+  PubScene.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -136,6 +140,7 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${OCTO_INCLUDE_DIRS}
   ./include
   ./framework/include
 )
@@ -176,6 +181,7 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
+  ${OCTO_LIBRARIES}
   hirop_perception
 )
 

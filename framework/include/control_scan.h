@@ -3,6 +3,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include "hirop_msgs/LoadPCL.h"
 #include <std_srvs/Empty.h>
+#include <Eigen/Geometry>
 
 
 class ControlScan
@@ -21,7 +22,7 @@ public:
      * @brief 开始扫描
      * @param pose 开始扫描的姿态
     */
-    bool start(const geometry_msgs::PoseStamped &pose);
+    bool start();
 
     /**
      * @brief 暂停
@@ -53,7 +54,7 @@ public:
      * @brief 显示扫描结果
      * @param file 全局地址
     */
-    bool show(const std::string& file);
+    bool show(const std::string& file, bool pub_octo = false);
 
     /**
      * @brief 获取开始扫描的姿态
@@ -74,6 +75,9 @@ private:
     ros::ServiceClient reset_rtabmap_client;
     ros::ServiceClient reset_rtabmap_odom_client;
 
+    ros::Publisher pcl_pub;
+    ros::Publisher publishOctomapPub;
+
 private:
     static bool on_off;
     static bool scan_switch;
@@ -84,4 +88,6 @@ private:
     ros::ServiceClient load_pcl_client;
 
     geometry_msgs::PoseStamped begin_pose;
+    Eigen::Vector3d t;
+    Eigen::Matrix3d r;
 };

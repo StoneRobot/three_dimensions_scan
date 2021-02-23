@@ -12,7 +12,6 @@ MotionActuator::MotionActuator(ros::NodeHandle *n, moveit::planning_interface::M
       joint_1_bounds{move_group_->getRobotModel()->getVariableBounds(move_group_->getJointNames()[0])},
       stop_flag{false}
 {
-    setConstraint(false, false);
     double speed;
     nh_->param("/scan_speed", speed, 0.03);
     move_group_->setMaxVelocityScalingFactor(speed);
@@ -37,23 +36,27 @@ void MotionActuator::setPose(const std::vector<geometry_msgs::PoseStamped> &pose
 bool MotionActuator::autoMotion()
 {
     bool flag = false;
-    setConstraint(false, false);
+    setConstraint(true, false);
     if (planAndMove())
         flag = rotate();
+    rmWorkspace();
     return flag;
 }
 
 bool MotionActuator::rotate()
 {
+    bool flag = false;
     setConstraint(false, true);
     move_group_->setPlanningTime(10);
     vector<double> joints = move_group_->getCurrentJointValues();
     joints[0] = joint_1_bounds.min_position_ + 0.1;
     setPose(joints);
-    planAndMove();
+    flag = planAndMove();
     joints[0] = joint_1_bounds.max_position_ - 0.1;
     setPose(joints);
-    return planAndMove();
+    flag &= planAndMove();
+    move_group_->clearPathConstraints();
+    return flag;
 }
 
 double MotionActuator::motionRecordPose(const std::vector<std::vector<double>> &joints)

@@ -23,18 +23,21 @@ ScanBridge::ScanBridge(ros::NodeHandle *n)
 
     reset_scan_data = nh_->advertiseService("reset_scan_data", &ScanBridge::resetScanCB, this);
     rm_workspace_server = nh_->advertiseService("rm_workspace", &ScanBridge::rmWorkspaceCB, this);
-    stop_motion_server = nh_->advertiseService("stop_motion", &ScanBridge::stopMotionCB, this);
+    stop_motion_server = nh_->advertiseService("stop_scan_motion", &ScanBridge::stopMotionCB, this);
+
+    pause_scan_server = nh_->advertiseService("pause_scan", &ScanBridge::pauseScanCB, this);
+    resume_scan_server = nh_->advertiseService("resume_scan", &ScanBridge::resumeScanCB, this);
 }
 
 ScanBridge::~ScanBridge()
 {
 }
 
-bool ScanBridge::hmScanCB(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &rep)
-{
-    rep.success = sf_ptr->HMScan(req.data);
-    return true;
-}
+// bool ScanBridge::hmScanCB(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &rep)
+// {
+//     rep.success = sf_ptr->HMScan(req.data);
+//     return true;
+// }
 
 bool ScanBridge::autoScanCB(MSGS_FILE::AutoScan::Request &req, MSGS_FILE::AutoScan::Response &rep)
 {
@@ -94,9 +97,9 @@ bool ScanBridge::saveScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::Sc
     return true;
 }
 
-bool ScanBridge::loadScanDataCB(MSGS_FILE::ScanFile::Request &req, MSGS_FILE::ScanFile::Response &rep)
+bool ScanBridge::loadScanDataCB(MSGS_FILE::PubScene::Request &req, MSGS_FILE::PubScene::Response &rep)
 {
-    rep.result = sf_ptr->loadScanData(req.file);
+    rep.result = sf_ptr->loadScanData(req.file, req.pub_octo);
     return true;
 }
 
@@ -115,5 +118,17 @@ bool ScanBridge::rmWorkspaceCB(std_srvs::Empty::Request &req, std_srvs::Empty::R
 bool ScanBridge::stopMotionCB(std_srvs::Empty::Request& req, std_srvs::Empty::Response & rep)
 {
     sf_ptr->stopMotion();
+    return true;
+}
+
+bool ScanBridge::pauseScanCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep)
+{
+    sf_ptr->pause();
+    return true;
+}
+
+bool ScanBridge::resumeScanCB(std_srvs::Empty::Request &req, std_srvs::Empty::Response &rep)
+{
+    sf_ptr->resume();
     return true;
 }

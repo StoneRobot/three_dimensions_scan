@@ -1,5 +1,6 @@
 <launch>
-    <param name="scan_speed" type="double" value="0.15" />
+    <param name="/scan_speed" type="double" value="0.1" />
+    <param name="/cameraFrame" type="str" value="point_cloud_pub_frame" />
     <rosparam file="$(find three_dimensions_scan)/cfg/workspace.yaml" command="load" />
     <node pkg="three_dimensions_scan" name="test" type="three_dimensions_scan_node" output="screen" />
 
@@ -9,4 +10,16 @@
         <arg name="rgb_topic" value="/camera/color/image_raw" />
         <arg name="camera_info_topic" value="/camera/color/camera_info" />
     </include>
+
+    <include file="$(find hsr_bringup)/launch/co605_gripper.launch" />
+
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+
+    <include file="$(find hsr_bringup)/launch/publish_d435i_calibration_single.launch" />
+
+    <include file="$(find hsr_bringup)/launch/publish_d435i_calibration_point_cloud_pub.launch" /> 
+
+    <node name="dm_bridge" type="dm_bridge" pkg="dm_bridge" />
+    
+    <include file="$(find perception_bridge)/launch/perception_bridge.launch" />
 </launch>
